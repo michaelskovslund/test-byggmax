@@ -1,8 +1,8 @@
 name: Byggmax Solution Upgrade
 
 on:
-  schedule:
-    - cron: '0 5 * * 0'
+#  schedule:
+#    - cron: '0 5 * * 0'
   workflow_dispatch:
 
 permissions:
@@ -27,7 +27,7 @@ jobs:
             -d "client_id=${{ secrets.CREATUM_BYGGMAX_API_CLIENT_ID }}" \
             -d "client_secret=${{ secrets.CREATUM_BYGGMAX_API_CLIENT_SECRET }}" \
             -d "grant_type=client_credentials" \
-            -d "scope=api://${{ secrets.BYGGMAX_API_CLIENT_ID }}/.default")
+            -d "scope=api://f2c3c9b8-0313-46a5-844b-5789e4521ed3/.default")
 
           ACCESS_TOKEN=$(echo $TOKEN_RESPONSE | jq -r '.access_token')
 
