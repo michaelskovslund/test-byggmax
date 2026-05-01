@@ -1,0 +1,76 @@
+name: Byggmax Solution Upgrade
+
+on:
+  schedule:
+    - cron: '0 5 * * 0'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  upgrade:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: byggmax-upgrade
+      cancel-in-progress: false
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get Entra ID access token
+        id: get_token
+        run: |
+          TOKEN_RESPONSE=$(curl -s -X POST "https://login.microsoftonline.com/${{ secrets.CREATUM_TENANT_ID }}/oauth2/v2.0/token" \
+            -H "Content-Type: application/x-www-form-urlencoded" \
+            -d "client_id=${{ secrets.CREATUM_BYGGMAX_API_CLIENT_ID }}" \
+            -d "client_secret=${{ secrets.CREATUM_BYGGMAX_API_CLIENT_SECRET }}" \
+            -d "grant_type=client_credentials" \
+            -d "scope=api://${{ secrets.BYGGMAX_API_CLIENT_ID }}/.default")
+
+          ACCESS_TOKEN=$(echo $TOKEN_RESPONSE | jq -r '.access_token')
+
+          echo "ACCESS_TOKEN=$ACCESS_TOKEN" >> $GITHUB_ENV
+
+      - name: Run solution upgrade
+        shell: pwsh
+        env:
+          API_URL: 'https://ca-byggmax-prod.proudsmoke-3b977158.swedencentral.azurecontainerapps.io'
+        run: |
+          $payloadObject = @{
+              solutionPath    = 'https://github.com/${{ github.repository }}'
+              targetFramework = 'net10.0'
+              branchPrefix    = 'upgrade'
+              skipValidation  = $false
+              frozenPackages  = @('FluentAssertions')
+              feeds           = @(
+                @{
+                  name = "byggmax"
+                  url  = "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
+                  pat  = "${{ secrets.GITHUB_TOKEN }}"
+                }
+              )
+          }
+          $payload = $payloadObject | ConvertTo-Json -Depth 10
+
+          $response = Invoke-WebRequest `
+              -Method POST `
+              -Uri "$env:API_URL/upgrade" `
+              -Headers @{ Authorization = "Bearer $ACCESS_TOKEN" } `
+              -ContentType 'application/json' `
+              -Body $payload `
+              -SkipHttpErrorCheck
+
+          if ($response.StatusCode -ne 422) {
+              throw "Expected authenticated POST /upgrade to return 422 but got $($response.StatusCode)."
+          }
+
+          $body = $response.Content | ConvertFrom-Json -Depth 20
+          Write-Host "Response body from the upgrade: $($body | ConvertTo-Json -Depth 20)" -ForegroundColor Yellow
+          
+          if ($body.exitCode -ne 1) {
+              throw "Expected exitCode 1 (FatalError) but got '$($body.exitCode)'."
+          }
+
+          
