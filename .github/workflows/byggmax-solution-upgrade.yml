@@ -48,11 +48,11 @@ jobs:
                 @{
                   name = "byggmax"
                   url  = "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
-                  pat  = "${{ secrets.GITHUB_TOKEN }}"
+                  pat  = "${{ secrets.CREATUM_BYGGMAX_GITHUB_TOKEN }}"
                 }
               )
               upstreamRepoUrl = 'https://github.com/${{ github.repository }}'
-              gitHubToken = "${{ secrets.GITHUB_TOKEN }}"
+              gitHubToken = "${{ secrets.CREATUM_BYGGMAX_GITHUB_TOKEN }}"
           }
           $payload = $payloadObject | ConvertTo-Json -Depth 10
 
