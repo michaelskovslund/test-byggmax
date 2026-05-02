@@ -29,6 +29,8 @@ jobs:
             -d "grant_type=client_credentials" \
             -d "scope=api://f2c3c9b8-0313-46a5-844b-5789e4521ed3/.default")
 
+          Write-Host "Access response: $TOKEN_RESPONSE" -ForegroundColor Yellow
+          
           ACCESS_TOKEN=$(echo $TOKEN_RESPONSE | jq -r '.access_token')
 
           echo "ACCESS_TOKEN=$ACCESS_TOKEN" >> $GITHUB_ENV
@@ -51,6 +53,8 @@ jobs:
                   pat  = "${{ secrets.GITHUB_TOKEN }}"
                 }
               )
+              upstreamRepoUrl = 'https://github.com/${{ github.repository }}'
+              gitHubToken = "${{ secrets.GITHUB_TOKEN }}"
           }
           $payload = $payloadObject | ConvertTo-Json -Depth 10
 
