@@ -7,7 +7,9 @@ on:
 
 permissions:
   contents: read
-  id-token: write
+  packages: read
+  pull-requests: write
+  statuses: write
 
 jobs:
   upgrade:
@@ -48,15 +50,13 @@ jobs:
                 @{
                   name = "byggmax"
                   url  = "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
-                  pat  = "${{ secrets.CREATUM_BYGGMAX_GITHUB_TOKEN }}"
+                  pat  = "${{ github.token }}"
                 }
               )
               upstreamRepoUrl = 'https://github.com/${{ github.repository }}'
-              gitHubToken = "${{ secrets.CREATUM_BYGGMAX_GITHUB_TOKEN }}"
+              gitHubToken = "${{ github.token }}"
           }
           $payload = $payloadObject | ConvertTo-Json -Depth 10
-
-          Write-Host "Request payload: $payload" -ForegroundColor Yellow
 
           $response = Invoke-WebRequest `
               -Method POST `
@@ -70,5 +70,5 @@ jobs:
           Write-Host "Response body from the upgrade: $($body | ConvertTo-Json -Depth 20)" -ForegroundColor Yellow
           
           if ($body.exitCode -ne 0) {
-              throw "Expected exitCode 1 (FatalError) but got '$($body.exitCode)'."
+              throw "Expected exitCode 0 (FatalError) but got '$($body.exitCode)' see response body for details."
           }
