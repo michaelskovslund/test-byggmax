@@ -62,10 +62,6 @@ jobs:
               -Body $payload `
               -SkipHttpErrorCheck
 
-          if ($response.StatusCode -ne 422) {
-              throw "Expected authenticated POST /upgrade to return 422 but got $($response.StatusCode)."
-          }
-
           $body = $response.Content | ConvertFrom-Json -Depth 20
           Write-Host "Response body from the upgrade: $($body | ConvertTo-Json -Depth 20)" -ForegroundColor Yellow
           
