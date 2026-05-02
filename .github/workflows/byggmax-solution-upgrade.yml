@@ -69,8 +69,6 @@ jobs:
           $body = $response.Content | ConvertFrom-Json -Depth 20
           Write-Host "Response body from the upgrade: $($body | ConvertTo-Json -Depth 20)" -ForegroundColor Yellow
           
-          if ($body.exitCode -ne 1) {
+          if ($body.exitCode -ne 0) {
               throw "Expected exitCode 1 (FatalError) but got '$($body.exitCode)'."
           }
-
-          
