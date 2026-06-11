@@ -50,11 +50,11 @@ jobs:
                 @{
                   name = "byggmax"
                   url  = "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
-                  pat  = "${{ github.token }}"
+                  pat  = "${{ secrets.GITHUB_TOKEN }}"
                 }
               )
               upstreamRepoUrl = 'https://github.com/${{ github.repository }}'
-              gitHubToken = "${{ github.token }}"
+              gitHubToken = "${{ secrets.GITHUB_TOKEN }}"
           }
           $payload = $payloadObject | ConvertTo-Json -Depth 10
 
