@@ -54,7 +54,7 @@ jobs:
                 }
               )
               upstreamRepoUrl = 'https://github.com/${{ github.repository }}'
-              gitHubToken = "${{ secrets.GITHUB_TOKEN }}"
+              gitHubToken = "${{ secrets.CREATUM_BYGGMAX_GITHUB_TOKEN }}"
           }
           $payload = $payloadObject | ConvertTo-Json -Depth 10
 
